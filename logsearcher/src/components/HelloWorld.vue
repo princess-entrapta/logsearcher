@@ -46,6 +46,7 @@ export default {
     },
     totallogs() {
       let sum = this.state.density.reduce((acc, val) => acc + val)
+      console.log(sum)
       if (sum > 1000000000) {
         return Number((sum / 1000000000.0).toPrecision(3)) + "B"
       }
@@ -58,23 +59,26 @@ export default {
       return sum
     }
   },
+  mounted() {
+    this.reqState();
+  },
   methods: {
     reqState() {
       this.loading = true
       this.timelineLoading = true
-      this.state = { "logs": [], "density": new Array(80).fill(0) }
+      this.state = { "logs": [], "density": new Array(60).fill(0) }
       fetch("/api/density", {
         method: "POST",
         body: JSON.stringify({ start: this.start.toJSON(), end: this.end.toJSON(), table: this.selectedView.name }),
         headers: { "Content-Type": "application/json" }
       }
-      ).then((resp) => resp.json().then((obj) => { this.state.density = obj, this.timelineLoading = false }, () => this.timelineLoading = false), () => this.timelineLoading = false)
+      ).then((resp) => resp.json().then((obj) => { this.state.density = obj; this.timelineLoading = false }, () => this.timelineLoading = false), () => this.timelineLoading = false)
       fetch("/api/logs", {
         method: "POST",
         body: JSON.stringify({ start: this.start.toJSON(), end: this.end.toJSON(), table: this.selectedView.name }),
         headers: { "Content-Type": "application/json" }
       }
-      ).then((resp) => resp.json().then((obj) => { this.state.logs = obj, this.loading = false }, () => this.loading = false), () => this.loading = false).then(this.loadnext)
+      ).then((resp) => resp.json().then((obj) => { this.state.logs = obj; this.loading = false }, () => this.loading = false), () => this.loading = false).then(this.loadnext)
       this.dragstart = -1
       this.dragend = -1
     },
@@ -181,7 +185,7 @@ export default {
     <div class="explorer">
       <div class="selector">
         <label>View to explore</label>
-        <select v-model="selectedView" @input="reqState()">
+        <select v-model="selectedView" @change="reqState()">
           <option v-for="view in views" :value="view">{{ view.name != "logs" ? view.name : "<All logs>" }}</option>
         </select>
       </div>
@@ -395,7 +399,7 @@ export default {
 
 .log-window {
   display: inline-block;
-  height: 70vh;
+  height: calc(80vh - 300px);
   overflow-y: scroll;
 }
 
