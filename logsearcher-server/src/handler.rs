@@ -217,14 +217,14 @@ pub async fn get_density(
     let interval_millis = (end - start).num_milliseconds();
     let interval_micro = (end - start).num_microseconds();
     let interval_str = match interval_micro {
-        Some(val) => format!("{} microseconds", max(val / 80, 10)),
-        None => format!("{} milliseconds", max(interval_millis / 80, 10)),
+        Some(val) => format!("{} microseconds", max(val / 59, 10)),
+        None => format!("{} milliseconds", max(interval_millis / 59, 10)),
     };
     let row = match interval_millis {
         0..=100000 => client
         .query(
             &format!(
-                "SELECT COUNT(*)::bigint from {} WHERE time >= '{}'::TIMESTAMP AND time <= '{}'::TIMESTAMP GROUP BY time_bucket_gapfill('{}', time)",
+                "SELECT COUNT(*)::bigint from {} WHERE time > '{}'::TIMESTAMP AND time < '{}'::TIMESTAMP GROUP BY time_bucket_gapfill('{}', time)",
                 table, start, end, interval_str
             ),
             &[],
@@ -232,13 +232,13 @@ pub async fn get_density(
         .await,
         100001..=10000000 => client.query(
             &format!(
-                "SELECT sum(count)::bigint from {}_sec_count WHERE time_bucket >= '{}'::TIMESTAMP AND time_bucket <= '{}'::TIMESTAMP GROUP BY time_bucket_gapfill('{}', time_bucket)",
+                "SELECT sum(count)::bigint from {}_sec_count WHERE time_bucket > '{}'::TIMESTAMP AND time_bucket < '{}'::TIMESTAMP GROUP BY time_bucket_gapfill('{}', time_bucket)",
                 table, start, end, interval_str
             ),&[],
         ).await,
         _ => client.query(
             &format!(
-                "SELECT sum(count)::bigint from {}_min_count WHERE time_bucket >= '{}'::TIMESTAMP AND time_bucket <= '{}'::TIMESTAMP GROUP BY time_bucket_gapfill('{}', time_bucket)",
+                "SELECT sum(count)::bigint from {}_min_count WHERE time_bucket > '{}'::TIMESTAMP AND time_bucket < '{}'::TIMESTAMP GROUP BY time_bucket_gapfill('{}', time_bucket)",
                 table, start, end, interval_str
             ),
             &[],
