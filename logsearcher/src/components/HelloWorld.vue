@@ -187,10 +187,9 @@ export default {
       </div>
       <div v-if="selectedView.name">
         <div class="flexdiv spacearound" v-if="!this.timelineLoading">
-          <button @click="zoomout()">Zoom out</button>
           <span>{{ start.toUTCString() }}</span>
 
-          <button @click="goLeft()">&lt;</button>
+          <button @click="goLeft()" class="control">&lt;</button>
           <div class="timeline" @dragstart="false" draggable="false">
             <div v-for="( c, idx ) in  state.density " @mousedown="dragstart = idx" @mousemove="dragend = idx;"
               @mouseup="zoom(dragstart, dragend)"
@@ -206,9 +205,8 @@ export default {
                 draggable="false" @dragstart="false">
               </div>
             </div>
-
           </div>
-          <button @click="goRight()">&gt;</button>
+          <button @click="goRight()" class="control">&gt;</button>
 
           <span>{{ end.toUTCString() }}</span>
         </div>
@@ -217,6 +215,7 @@ export default {
         </div>
         <div class="flexdiv">
           <span>Total number of records: <strong>{{ totallogs }}</strong></span>
+          <button @click="zoomout()" class="control" v-if="!timelineLoading">Zoom out</button>
         </div>
         <div class="flexdiv">
           <div class="log-window" @scroll="checkscroll($event)">
@@ -436,6 +435,14 @@ input {
   border: 1px solid #888888;
   padding: 8px;
   border-radius: 4px;
+}
+
+.control {
+  margin-left: 20px;
+  margin-right: 20px;
+  background-color: #444444;
+  color: white;
+  border: 1px solid #888888;
 }
 
 input:focus {
